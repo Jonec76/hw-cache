@@ -1,2 +1,4 @@
 cache
 *.o
+.vscode
+*.out
