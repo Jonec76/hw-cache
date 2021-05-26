@@ -2,3 +2,4 @@ cache
 *.o
 .vscode
 *.out
+trace[2-4].txt

@@ -13,6 +13,7 @@ int bit_byte = 4;
 struct Cache{
     int ptr;
     unsigned long* set;
+    bool* sec_chance;
 };
 
 void get_bits(int block_bits, int associativity, int* bit_tag, int* bit_index, int* bit_asso){
@@ -125,6 +126,8 @@ long update(Cache** cache, unsigned long tag, unsigned long index, int algo, int
     long ans = -1;
     int ptr = (*cache)[index].ptr;
     unsigned long victim;
+    unsigned long temp;
+
     switch (algo){
         case 0: // FIFO
             for(int i=0;i<width;i++){
@@ -155,7 +158,6 @@ long update(Cache** cache, unsigned long tag, unsigned long index, int algo, int
 
             (*cache)[index].set[(*cache)[index].ptr % width] = tag;
 
-            unsigned long temp;
             for(int j = (*cache)[index].ptr % width; j >= 1; j--){
                 temp = (*cache)[index].set[j];
                 (*cache)[index].set[j] = (*cache)[index].set[j-1];
@@ -164,7 +166,22 @@ long update(Cache** cache, unsigned long tag, unsigned long index, int algo, int
 
             (*cache)[index].ptr = ((*cache)[index].ptr != width-1)?(*cache)[index].ptr+1:(*cache)[index].ptr ;
             break;
-        case 2: // Customize
+        case 2: // Customize: Second Chance FIFO
+            for(int i=0;i<width;i++){
+                if((*cache)[index].set[i] == tag){ // If cache hit
+                    (*cache)[index].sec_chance[i] = true;
+                    return ans;
+                }
+            }
+            // If cache miss
+            while((*cache)[index].sec_chance[(*cache)[index].ptr % width]){
+                (*cache)[index].sec_chance[(*cache)[index].ptr % width] = false;
+                (*cache)[index].ptr++;
+            }
+            victim = (*cache)[index].set[(*cache)[index].ptr % width];
+            ans = (victim == 0)?-1:victim;
+            (*cache)[index].set[(*cache)[index].ptr % width] = tag;
+            (*cache)[index].ptr++ ;
             break;
     }
     return ans;
@@ -192,8 +209,10 @@ int main(int argc, char *argv[]){
     Cache* cache = new Cache[1<<bit_index];
     for(int i = 0; i < 1<<bit_index; ++i){
         cache[i].set = new unsigned long [1<<bit_asso];
+        cache[i].sec_chance = new bool [1<<bit_asso];
         cache[i].ptr = 0;
         memset(cache[i].set, 0, (1<<bit_asso)*sizeof(unsigned long));
+        memset(cache[i].sec_chance, false, (1<<bit_asso)*sizeof(bool));
     }
     string line;
     ofstream ans_file;
@@ -210,6 +229,7 @@ int main(int argc, char *argv[]){
     }
     for(int i = 0; i < 1<<bit_index; ++i){
         delete [] cache[i].set;
+        delete [] cache[i].sec_chance;
     }
     delete [] cache;
 }
