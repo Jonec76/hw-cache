@@ -1,1 +1,1 @@
-make verify REQ_FILE=trace3.txt VIC_FILE=trace3.out
+make verify REQ_FILE=trace1.txt VIC_FILE=trace1.out

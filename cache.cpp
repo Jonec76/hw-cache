@@ -8,7 +8,7 @@ int cache_size = -1, block_size = -1, associativity=-1, algo=-1;
 int bit_tag = -1;
 int bit_index = -1;
 int bit_asso = -1;
-int bit_byte = 4;
+int bit_byte = -1;
 
 struct Cache{
     int ptr;
@@ -199,6 +199,7 @@ int main(int argc, char *argv[]){
     cache_size = stoi(x);
     getline(cin_, x);
     block_size = stoi(x);
+    bit_byte = __builtin_ctz(block_size);
     getline(cin_, x);
     associativity = stoi(x);
     getline(cin_, x);

@@ -1,1 +1,1 @@
-./cache  trace1.txt trace1.out
+./cache  trace3.txt trace3.out
